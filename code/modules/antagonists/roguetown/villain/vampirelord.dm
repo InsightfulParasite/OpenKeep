@@ -109,6 +109,7 @@ GLOBAL_LIST_EMPTY(vampire_objects)
 		H.after_creation()
 	H.equipOutfit(/datum/outfit/job/roguetown/vamplord)
 	H.patron = GLOB.patronlist[/datum/patron/inhumen/zizo]
+	SSfamilytree.AssignAsAncestor(H)
 
 	return TRUE
 
