@@ -9,7 +9,7 @@
 	emote_hear = null
 	emote_see = null
 	speak_chance = 1
-	turns_per_move = 4
+	turns_per_move = 6
 	see_in_dark = 9
 	move_to_delay = 2
 	base_intents = list(/datum/intent/simple/bite, /datum/intent/simple/claw)
@@ -46,18 +46,25 @@
 	aggressive = 1
 	remains_type = null
 	body_eater = TRUE
-	var/sneaking = FALSE
+	var/light_check = 0
+	var/light_check_delay = 3 SECONDS
 	var/sneak_cooldown = 0
 	var/sneak_cooldown_delay = 30 SECONDS
 
 /mob/living/simple_animal/hostile/retaliate/rogue/lamia/AttackingTarget()
-	if(sneaking)
+	if(m_intent == MOVE_INTENT_SNEAK)
 		break_sneak()
 	return ..()
 
 /mob/living/simple_animal/hostile/retaliate/rogue/lamia/handle_automated_action()
-	if(!sneaking && world.time >= sneak_cooldown)
-		sneak_now()
+	if(m_intent != MOVE_INTENT_SNEAK && world.time >= sneak_cooldown && isturf(loc) && light_check < world.time)
+		var/turf/ourlocation = get_turf(src)
+		var/light_amount = ourlocation.get_lumcount()
+		light_check = world.time + light_check_delay
+		if(light_amount < SHADOW_SPECIES_LIGHT_THRESHOLD)
+			sneak_now()
+	if(m_intent == MOVE_INTENT_SNEAK && world.time < mob_timers[MT_FOUNDSNEAK] + 30 SECONDS)
+		break_sneak()
 	return ..()
 
 /mob/living/simple_animal/hostile/retaliate/rogue/lamia/simple_limb_hit(zone)
@@ -103,11 +110,11 @@
 	return ..()
 
 /mob/living/simple_animal/hostile/retaliate/rogue/lamia/proc/sneak_now()
-	if(!sneaking && world.time >= sneak_cooldown)
-		sneaking = TRUE
+	if(m_intent != MOVE_INTENT_SNEAK && world.time >= sneak_cooldown)
 		alpha = 100
+		m_intent = MOVE_INTENT_SNEAK
 
 /mob/living/simple_animal/hostile/retaliate/rogue/lamia/proc/break_sneak()
+	m_intent = MOVE_INTENT_RUN
 	alpha = 255
-	sneaking = FALSE
 	sneak_cooldown = world.time + sneak_cooldown_delay
