@@ -41,7 +41,6 @@
 	del_on_deaggro = 999 SECONDS
 	retreat_health = 0.1
 	food = 0
-	attack_sound = list('sound/vo/mobs/saiga/attack (1).ogg','sound/vo/mobs/saiga/attack (2).ogg')
 	dodgetime = 15
 	aggressive = 1
 	remains_type = null

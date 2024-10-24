@@ -28,7 +28,7 @@
 	retreat_distance = 0
 	minimum_distance = 0
 	milkies = FALSE
-	food_type = list(/obj/item/reagent_containers/food/snacks/rogue/meat, /obj/item/bodypart, /obj/item/organ)
+	food_type = list()
 	footstep_type = null
 	pooptype = null
 	STACON = 12
@@ -40,7 +40,6 @@
 	del_on_deaggro = 999 SECONDS
 	retreat_health = 0.1
 	food = 0
-	attack_sound = list('sound/vo/mobs/saiga/attack (1).ogg','sound/vo/mobs/saiga/attack (2).ogg')
 	dodgetime = 15
 	aggressive = 1
 	remains_type = null
@@ -72,6 +71,10 @@
 				adjustBruteLoss(-30)
 				visible_message(span_notice("body starts to rapidly heal."))
 	return ..()
+
+//Headless prefer to eat whole bodies
+/mob/living/simple_animal/hostile/retaliate/rogue/headless/DismemberBody(mob/living/L)
+	SwallowEnemy(L)
 
 /mob/living/simple_animal/hostile/retaliate/rogue/headless/simple_limb_hit(zone)
 	if(!zone)
@@ -120,13 +123,18 @@
 	return ..()
 
 /mob/living/simple_animal/hostile/retaliate/rogue/headless/proc/SwallowEnemy(mob/living/L)
+	if(swallowed_mob)
+		return
 	visible_message(span_notice("unhinges its jaw and swallows [L]."))
+	playsound(loc, 'sound/misc/eat.ogg', 25, TRUE)
 	L.forceMove(src)
 	swallowed_mob = L
+	health_at_swallow = health
 	swallow_cooldown = world.time + swallow_cooldown_delay
 
 /mob/living/simple_animal/hostile/retaliate/rogue/headless/proc/SpitUp()
 	if(swallowed_mob)
 		visible_message(span_notice("vomits a disheveled [swallowed_mob]."))
+		playsound(loc, 'sound/vo/vomit.ogg', 25, TRUE)
 		swallowed_mob.forceMove(get_turf(src))
 		swallowed_mob = null
